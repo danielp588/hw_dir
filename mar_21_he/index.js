@@ -1,15 +1,19 @@
 const fsPromises = require('fs').promises;
 const path = require('path');
-const {Create, Read, ConcatFiles} = require('./functions');
+const functions = require('./functions');
 
-
+const {eventLog} = require('./logEvents');
+const EventEmitter = require('events');
+class MyEmitter extends EventEmitter{};
+const myEmitter = new MyEmitter();
 
 
 const Main = ()=>{
-    Create(3,"blablablablaaaaa")
-    Create(2,"baskfbsfbusyfaa")
-    Create(4,"222222222222222")
-    ConcatFiles();
+    myEmitter.on('readFile',() => {eventLog()});
+    myEmitter.on('endProgram', () => {functions.PrintFiles()})
+
+    myEmitter.emit('readFile', 'Hello from index emitter');
+    myEmitter.emit('endProgram');
 }
 
 Main();

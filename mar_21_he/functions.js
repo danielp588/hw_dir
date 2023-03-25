@@ -24,48 +24,40 @@ const GetRandNumber = () => {
     return num;
 }
 
-const ConcatFiles = async () => {
-    
-    //delete file if exists
-    try { await fsPromises.unlink(path.join(__dirname,'files','concatTextFile.txt')); }
-    catch(err) { console.log("File doesnt exist"); }
+async function ConcatFiles() {
+    try {
+        //delete file
+        if (existsSync(path.join(__dirname, 'files', 'concatTextFile.txt')))
+            await unlink(path.join(__dirname, 'files', 'concatTextFile.txt'));
 
-    let rnd = GetRandNumber();
+        //get random number between 1 and 5
+        let n = GetRandNumber();
 
-    await fsPromises.writeFile(path.join(__dirname,'files', 'stringtxt.txt'),'hey');
-    const newData = await fsPromises.readFile(path.join(__dirname,'files', 'stringtxt.txt'));
-    console.log(newData.toString())
-
-    try{
-        const delayed = async () => {
-            fs.readdir((path.join(__dirname,'files')), (err,files)=>{
-                if(err){
-                    console.warn(err);
-                }
-                else{
-                    console.log("random ->", rnd)
-                    for(let i = 0; i < files.length; i++){
-                        if(files[i].includes(rnd)){ break; }//break out of loop when found file[rnd].txt
-
-                        fs.readFile(path.join(__dirname,'files',files[i]), (err,data)=>{
-                            if (err) throw err;
-                            fs.appendFile(path.join(__dirname,'files','stringtxt.txt'),data.toString(),(err)=>{
-                                if (err) throw err;
-                            })
-                        })   
-                    }
-                }
-            })
+        //read files 
+        for (let i = 1; i <= n; i++) {
+            let text = await Read(i);
+            await appendFile(path.join(__dirname, 'files', 'stringtxt.txt'), `${text}\n`);
         }
-        await delayed();
-        //tried making delated func await, yet I reach this line VVVVVV before the code above
-        console.warn("end reached")
-    }catch(err){
+
+        //change file name
+        await rename(path.join(__dirname, 'files', 'stringtxt.txt'), path.join(__dirname, 'files', 'concatTextFile.txt'));
+        console.log(`created concatTextFile until n = ${n}`)
+
+    } catch (err) {
         console.error(err);
     }
-    
+}
+
+const PrintFiles = async () => {
+    const data = await fsPromises.readdir(path.join(__dirname,'files'));
+    for(let i = 0; i < data.length; i++){
+        const currData = await fsPromises.readFile(path.join(__dirname, 'files', `${data[i].toString()}`));
+        console.log(currData.toString());
+        console.log("***********************");
+    }
+
 }
 
 
 
-module.exports = {Create, Read, ConcatFiles};
+module.exports = {PrintFiles,GetRandNumber, Create, Read, ConcatFiles};
